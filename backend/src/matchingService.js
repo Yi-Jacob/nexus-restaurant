@@ -30,11 +30,17 @@ function buildExplanation({
   if (tagMatches.length > 0) {
     parts.push(`Tags matched: ${tagMatches.join(", ")}`);
   }
-  if (distanceKm !== null) {
-    parts.push(`Within ${distanceKm.toFixed(1)} km`);
+  if (distanceKm !== null && distanceKm !== undefined) {
+    const distance = Number(distanceKm);
+    if (!Number.isNaN(distance)) {
+      parts.push(`Within ${distance.toFixed(1)} km`);
+    }
   }
-  if (rating !== null) {
-    parts.push(`Rating ${rating.toFixed(1)}`);
+  if (rating !== null && rating !== undefined) {
+    const ratingNum = Number(rating);
+    if (!Number.isNaN(ratingNum)) {
+      parts.push(`Rating ${ratingNum.toFixed(1)}`);
+    }
   }
   return parts.length > 0 ? parts.join(" • ") : "Matches your criteria";
 }
@@ -67,7 +73,7 @@ export function matchAndRankRestaurants({
     .map((row) => {
       const distanceKm =
         latitude !== null && longitude !== null && row.latitude !== null && row.longitude !== null
-          ? haversineKm(latitude, longitude, row.latitude, row.longitude)
+          ? haversineKm(Number(latitude), Number(longitude), Number(row.latitude), Number(row.longitude))
           : null;
 
       const withinRadius = distanceKm === null ? true : distanceKm <= radiusKm;
@@ -93,7 +99,7 @@ export function matchAndRankRestaurants({
   // Score is a weighted combination of attribute match, distance, and rating.
   return filtered
     .map(({ row, distanceKm, cuisineMatch, priceMatch, tagMatches }) => {
-      const ratingScore = row.rating ? row.rating / 5 : 0;
+      const ratingScore = row.rating ? Number(row.rating) / 5 : 0;
       const tagScore = tags.length > 0 ? tagMatches.length / tags.length : 0.5;
       const distanceScore = distanceKm === null ? 0.5 : Math.max(0, 1 - distanceKm / radiusKm);
       const attributeScore =

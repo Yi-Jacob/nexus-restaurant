@@ -32,8 +32,10 @@ export default function App() {
         </div>
       </header>
 
-      <main>{activeTab === "internal" ? <InternalInterface apiBaseUrl={apiBaseUrl} /> : null}</main>
-      <main>{activeTab === "external" ? <ExternalInterface apiBaseUrl={apiBaseUrl} /> : null}</main>
+      <main className="content">
+        {activeTab === "internal" ? <InternalInterface apiBaseUrl={apiBaseUrl} /> : null}
+        {activeTab === "external" ? <ExternalInterface apiBaseUrl={apiBaseUrl} /> : null}
+      </main>
     </div>
   );
 }

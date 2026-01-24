@@ -39,15 +39,20 @@ export default function ExternalInterface({ apiBaseUrl }) {
       return "";
     }
     // Cache key includes all criteria so new inputs trigger a new fetch.
-    return buildQuery(searchParams);
+    // Include radius_km even if empty to ensure query runs.
+    const params = { ...searchParams };
+    if (!params.radius_km) {
+      params.radius_km = "25";
+    }
+    return buildQuery(params);
   }, [searchParams]);
 
   const matchesQuery = useQuery({
     // Query key is built from location + attributes for deterministic caching.
     queryKey: ["bestMatch", queryString],
     queryFn: () => fetchBestMatch({ apiBaseUrl, query: queryString }),
-    // Disabled until user submits, preventing cache noise from typing.
-    enabled: Boolean(queryString)
+    // Enable query when searchParams is set (user clicked search), even if query string is empty.
+    enabled: searchParams !== null
   });
 
   const handleChange = (field) => (event) => {
@@ -62,9 +67,13 @@ export default function ExternalInterface({ apiBaseUrl }) {
       state: formState.state.trim(),
       cuisine: formState.cuisine.trim(),
       price_range: formState.price_range.trim(),
-      tags: formState.tags.trim()
+      tags: formState.tags.trim(),
+      lat: formState.lat.trim(),
+      lng: formState.lng.trim(),
+      radius_km: formState.radius_km.trim() || "25"
     };
     // New payload updates query key and invalidates previous cache entry.
+    // Always set searchParams to trigger search, even with minimal criteria.
     setSearchParams(payload);
   };
 
