@@ -13,6 +13,7 @@ create table if not exists restaurants (
   name text not null,
   city text not null,
   state text not null,
+  unique (name, city, state),
   latitude numeric,
   longitude numeric,
   cuisine_id integer not null references cuisines(id),

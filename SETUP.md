@@ -16,7 +16,7 @@ brew services start postgresql@15
 
 **Option C: Using Docker**
 ```bash
-docker run --name restaurant-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=restaurant_insights -p 5432:5432 -d postgres:15
+docker run --name restaurant-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=restaurant_insights -p 5434:5432 -d postgres:15
 ```
 
 ### 2. Create Database
@@ -37,6 +37,18 @@ CREATE DATABASE restaurant_insights;
 
 ```bash
 psql -d restaurant_insights -f backend/sql/schema.sql
+```
+
+### 4. Seed Data
+
+```bash
+cd backend
+npm run seed
+```
+
+To clear duplicates and re-seed from scratch:
+```bash
+npm run seed:reset
 ```
 
 ## Running the Application
@@ -67,7 +79,7 @@ Frontend will run on http://localhost:5173
 **Postgres connection error?**
 - Check Postgres is running: `brew services list` or check Postgres.app
 - Verify connection string in `backend/.env` matches your setup
-- Default: `postgres://postgres:postgres@localhost:5432/restaurant_insights`
+- Default: `postgres://postgres:postgres@localhost:5434/restaurant_insights`
 
 **Port already in use?**
 - Change `PORT` in `backend/.env` or `VITE_API_URL` in `frontend/.env`

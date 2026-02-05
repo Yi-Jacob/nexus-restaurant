@@ -176,11 +176,21 @@ const sampleRestaurants = [
   }
 ];
 
-async function seed() {
+async function seed(reset = false) {
   const client = await getClient();
-  
+
   try {
     await client.query("BEGIN");
+
+    if (reset) {
+      console.log("🗑️  Truncating existing data...");
+      await client.query("TRUNCATE cuisines, tags RESTART IDENTITY CASCADE");
+      console.log("✅ Tables truncated");
+      console.log("🔧 Ensuring unique constraint on restaurants...");
+      await client.query("ALTER TABLE restaurants DROP CONSTRAINT IF EXISTS restaurants_name_city_state_key");
+      await client.query("ALTER TABLE restaurants ADD CONSTRAINT restaurants_name_city_state_key UNIQUE (name, city, state)");
+      console.log("✅ Constraint added");
+    }
 
     console.log("🌱 Seeding cuisines...");
     const cuisineMap = {};
@@ -212,7 +222,7 @@ async function seed() {
         `INSERT INTO restaurants 
          (name, city, state, latitude, longitude, cuisine_id, price_range, rating, notes)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         ON CONFLICT DO NOTHING
+         ON CONFLICT (name, city, state) DO NOTHING
          RETURNING id`,
         [
           restaurant.name,
@@ -258,7 +268,8 @@ async function seed() {
   }
 }
 
-seed()
+const reset = process.argv.includes("--reset");
+seed(reset)
   .then(() => {
     process.exit(0);
   })
